@@ -11,6 +11,7 @@ import {
    CardHeader,
    CardTitle,
 } from '@/components/ui/card'
+import { toast } from '@/components/ui/use-toast'
 import { useAuthenticated } from '@/hooks/useAuthentication'
 import { getCountInCart, getLocalCart, writeLocalCart } from '@/lib/cart'
 import { useCartContext } from '@/state/Cart'
@@ -104,8 +105,19 @@ export const Item = ({ cartItem }) => {
          }
 
          setFetchingCart(false)
+
+         toast({
+            title: `${product?.title} added to cart`,
+            description: 'You can continue shopping or go to checkout.',
+            duration: 2000,
+         })
       } catch (error) {
          console.error({ error })
+         toast({
+            title: 'Error adding item to cart',
+            description: 'Please try again later.',
+            variant: 'destructive',
+         })
       }
    }
 
@@ -157,8 +169,18 @@ export const Item = ({ cartItem }) => {
          }
 
          setFetchingCart(false)
+         toast({
+            title: `${product?.title} removed from cart`,
+            description: 'You can continue shopping or go to checkout.',
+            duration: 2000,
+         })
       } catch (error) {
          console.error({ error })
+         toast({
+            title: 'Error removing item from cart',
+            description: 'Please try again later.',
+            variant: 'destructive',
+         })
       }
    }
 

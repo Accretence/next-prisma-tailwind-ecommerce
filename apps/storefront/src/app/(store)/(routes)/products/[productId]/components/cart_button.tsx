@@ -2,10 +2,13 @@
 
 import { Spinner } from '@/components/native/icons'
 import { Button } from '@/components/ui/button'
+import { ToastAction } from '@/components/ui/toast'
+import { toast } from '@/components/ui/use-toast'
 import { useAuthenticated } from '@/hooks/useAuthentication'
 import { getCountInCart, getLocalCart } from '@/lib/cart'
 import { CartContextProvider, useCartContext } from '@/state/Cart'
 import { MinusIcon, PlusIcon, ShoppingBasketIcon, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 export default function CartButton({ product }) {
@@ -18,9 +21,14 @@ export default function CartButton({ product }) {
 
 export function ButtonComponent({ product }) {
    const { authenticated } = useAuthenticated()
+   const router = useRouter()
    const { loading, cart, refreshCart, dispatchCart } = useCartContext()
 
    const [fetchingCart, setFetchingCart] = useState(false)
+
+   function handleViewCart() {
+      router.push('/cart')
+   }
 
    function findLocalCartIndexById(array, productId) {
       for (let i = 0; i < array.length; i++) {
@@ -85,8 +93,19 @@ export function ButtonComponent({ product }) {
          }
 
          setFetchingCart(false)
+
+         toast({
+            title: `${product.title} added to cart`,
+            description: 'Check out suggestes products.',
+            action: <ToastAction altText="View cart" onClick={handleViewCart}>View cart</ToastAction>,
+         })
       } catch (error) {
          console.error({ error })
+         toast({
+            title: 'Error adding to cart',
+            description: 'Something went wrong. Please try again.',
+            variant: 'destructive',
+         })
       }
    }
 
@@ -141,8 +160,19 @@ export function ButtonComponent({ product }) {
          }
 
          setFetchingCart(false)
+
+         toast({
+            title: `${product.title} removed from cart`,
+            description: 'Check out suggestes products.',
+            action: <ToastAction altText="View cart" onClick={handleViewCart}>View cart</ToastAction>,
+         })
       } catch (error) {
          console.error({ error })
+         toast({
+            title: 'Error removing from cart',
+            description: 'Something went wrong. Please try again.',
+            variant: 'destructive',
+         })
       }
    }
 

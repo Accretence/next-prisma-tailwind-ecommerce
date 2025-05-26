@@ -63,6 +63,7 @@ export const config = {
       '/payments/:path*',
       '/codes/:path*',
       '/users/:path*',
+      '/reports/:path*',
       '/api/:path*',
    ],
 }

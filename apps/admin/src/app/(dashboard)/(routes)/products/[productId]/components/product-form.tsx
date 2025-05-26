@@ -164,7 +164,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                onSubmit={form.handleSubmit(onSubmit)}
                className="space-y-8 w-full"
             >
-               <FormField
+               {/* Commented this so page works without Cloudinary setup */}
+               {/* <FormField
                   control={form.control}
                   name="images"
                   render={({ field }) => (
@@ -189,7 +190,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                         <FormMessage />
                      </FormItem>
                   )}
-               />
+               /> */}
                <div className="md:grid md:grid-cols-3 gap-8">
                   <FormField
                      control={form.control}

@@ -12,6 +12,11 @@ export function MainNav({
 
    const routes = [
       {
+         href: `/reports`,
+         label: 'Reports',
+         active: pathname.includes(`/reports`),
+      },
+      {
          href: `/banners`,
          label: 'Banners',
          active: pathname.includes(`/banners`),

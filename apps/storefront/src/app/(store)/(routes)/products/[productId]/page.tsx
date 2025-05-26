@@ -5,6 +5,7 @@ import { ChevronRightIcon } from 'lucide-react'
 import type { Metadata, ResolvingMetadata } from 'next'
 import Link from 'next/link'
 
+import { CrossSellProducts } from './components/cross_sell_products'
 import { DataSection } from './components/data'
 
 type Props = {
@@ -44,6 +45,7 @@ export default async function Product({
       include: {
          brand: true,
          categories: true,
+         crossSellProducts: true,
       },
    })
 
@@ -55,6 +57,9 @@ export default async function Product({
                <ImageColumn product={product} />
                <DataSection product={product} />
             </div>
+            {product.crossSellProducts.length && (
+               <CrossSellProducts products={product.crossSellProducts} />
+            )}
          </>
       )
    }

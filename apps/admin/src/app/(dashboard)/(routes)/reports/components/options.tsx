@@ -1,6 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
 import {
    Command,
    CommandEmpty,
@@ -9,188 +10,77 @@ import {
    CommandItem,
    CommandList,
 } from '@/components/ui/command'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
    Popover,
    PopoverContent,
    PopoverTrigger,
 } from '@/components/ui/popover'
-import {
-   Select,
-   SelectContent,
-   SelectItem,
-   SelectTrigger,
-   SelectValue,
-} from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
 import { cn, isVariableValid } from '@/lib/utils'
 import { slugify } from '@persepolis/slugify'
+import { format } from 'date-fns'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import React, { useEffect } from 'react'
+import { DateRange } from 'react-day-picker'
 
-export function TextSearchInput({ initialData }) {
+export function DateRangePicker({ initialFrom, initialTo }) {
    const router = useRouter()
    const pathname = usePathname()
    const searchParams = useSearchParams()
 
-   const [value, setValue] = React.useState('')
-   const [debouncedValue, setDebouncedValue] = React.useState('')
-
-   useEffect(() => {
-      if (isVariableValid(initialData)) setValue(initialData)
-   }, [initialData])
-
-   useEffect(() => {
-      const handler = setTimeout(() => {
-         setDebouncedValue(value.trim())
-      }, 300)
-
-      return () => {
-         clearTimeout(handler)
-      }
-   }, [value])
+   const [date, setDate] = React.useState<DateRange>({
+      from: initialFrom ? new Date(initialFrom) : undefined,
+      to: initialTo ? new Date(initialTo) : undefined,
+   })
 
    useEffect(() => {
       const current = new URLSearchParams(Array.from(searchParams.entries()))
 
-      if (debouncedValue) {
-         current.set('search', debouncedValue)
-      } else {
-         current.delete('search')
-      }
+      if (date?.from) current.set('from', date.from.toISOString())
+      else current.delete('from')
 
-      // cast to string
+      if (date?.to) current.set('to', date.to.toISOString())
+      else current.delete('to')
+
       const search = current.toString()
-      // or const query = `${'?'.repeat(search.length && 1)}${search}`;
       const query = search ? `?${search}` : ''
 
       router.replace(`${pathname}${query}`, {
          scroll: false,
       })
-   }, [debouncedValue])
+   }, [date])
+
+   const buttonText = date?.from
+      ? date?.to
+         ? `${format(date.from, 'LLL dd, y')} - ${format(date.to, 'LLL dd, y')}`
+         : `${format(date.from, 'LLL dd, y')}`
+      : 'Pick a date'
 
    return (
-      <div className="w-full">
-         <Input
-            type="text"
-            placeholder="Search products..."
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            className="w-full"
-         />
-      </div>
-   )
-}
-
-export function PriceRangeInput({ initialMin, initialMax }) {
-   const router = useRouter()
-   const pathname = usePathname()
-   const searchParams = useSearchParams()
-
-   const [minPrice, setMinPrice] = React.useState('')
-   const [maxPrice, setMaxPrice] = React.useState('')
-
-   useEffect(() => {
-      const timeout = setTimeout(() => {
-         const current = new URLSearchParams(Array.from(searchParams.entries()))
-
-         if (minPrice) {
-            current.set('minPrice', minPrice)
-         } else {
-            current.delete('minPrice')
-         }
-
-         if (maxPrice) {
-            current.set('maxPrice', maxPrice)
-         } else {
-            current.delete('maxPrice')
-         }
-
-         const search = current.toString()
-         const query = search ? `?${search}` : ''
-
-         router.replace(`${pathname}${query}`, {
-            scroll: false,
-         })
-      }, 300)
-
-      return () => clearTimeout(timeout)
-   }, [minPrice, maxPrice])
-
-   useEffect(() => {
-      if (isVariableValid(initialMin)) setMinPrice(initialMin)
-      if (isVariableValid(initialMax)) setMaxPrice(initialMax)
-   }, [initialMin, initialMax])
-
-   return (
-      <div className="flex gap-2">
-         <Input
-            type="number"
-            placeholder="Min $"
-            value={minPrice}
-            onChange={(e) => setMinPrice(e.target.value)}
-            min={0}
-         />
-         <Input
-            type="number"
-            placeholder="Max $"
-            value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value)}
-            min={0}
-         />
-      </div>
-   )
-}
-
-export function SortBy({ initialData }) {
-   const router = useRouter()
-   const pathname = usePathname()
-   const searchParams = useSearchParams()
-
-   const [value, setValue] = React.useState('featured')
-
-   useEffect(() => {
-      if (isVariableValid(initialData)) setValue(initialData)
-   }, [initialData])
-
-   return (
-      <Select
-         onValueChange={(currentValue) => {
-            const current = new URLSearchParams(
-               Array.from(searchParams.entries())
-            )
-
-            if (currentValue === value) {
-               current.delete('sort')
-               setValue('')
-            } else {
-               current.set('sort', currentValue)
-               setValue(currentValue)
-            }
-
-            // cast to string
-            const search = current.toString()
-            // or const query = `${'?'.repeat(search.length && 1)}${search}`;
-            const query = search ? `?${search}` : ''
-
-            router.replace(`${pathname}${query}`, {
-               scroll: false,
-            })
-         }}
-      >
-         <SelectTrigger className="w-full">
-            <SelectValue placeholder="Sort By" />
-         </SelectTrigger>
-         <SelectContent>
-            {/* <SelectItem value="featured">Featured</SelectItem> */}
-            <SelectItem value="most_expensive">Most Expensive</SelectItem>
-            <SelectItem value="least_expensive">Least Expensive</SelectItem>
-            <SelectItem value="title_asc">Title (A-Z)</SelectItem>
-            <SelectItem value="title_desc">Title (Z-A)</SelectItem>
-         </SelectContent>
-      </Select>
+      <Popover>
+         <PopoverTrigger asChild>
+            <Button
+               id="date"
+               variant="outline"
+               className={cn(
+                  'w-full justify-start text-left font-normal',
+                  !date && 'text-muted-foreground'
+               )}
+            >
+               {buttonText}
+            </Button>
+         </PopoverTrigger>
+         <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+               initialFocus
+               mode="range"
+               defaultMonth={date?.from}
+               selected={date}
+               onSelect={setDate}
+               numberOfMonths={2}
+            />
+         </PopoverContent>
+      </Popover>
    )
 }
 
@@ -363,48 +253,5 @@ export function BrandCombobox({ brands, initialBrand }) {
             </Command>
          </PopoverContent>
       </Popover>
-   )
-}
-
-export function AvailableToggle({ initialData }) {
-   const router = useRouter()
-   const pathname = usePathname()
-   const searchParams = useSearchParams()
-   const [value, setValue] = React.useState(false)
-
-   useEffect(() => {
-      setValue(initialData === 'true' ? true : false)
-   }, [initialData])
-
-   return (
-      <div className="flex w-full border rounded-md items-center space-x-2">
-         <div className="mx-auto flex gap-2 items-center">
-            <Switch
-               checked={value}
-               onCheckedChange={(currentValue: boolean) => {
-                  const current = new URLSearchParams(
-                     Array.from(searchParams.entries())
-                  )
-
-                  current.set(
-                     'isAvailable',
-                     currentValue == true ? 'true' : 'false'
-                  )
-                  setValue(currentValue)
-
-                  // cast to string
-                  const search = current.toString()
-                  // or const query = `${'?'.repeat(search.length && 1)}${search}`;
-                  const query = search ? `?${search}` : ''
-
-                  router.replace(`${pathname}${query}`, {
-                     scroll: false,
-                  })
-               }}
-               id="available"
-            />
-            <Label htmlFor="available">Only Available</Label>
-         </div>
-      </div>
    )
 }

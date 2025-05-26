@@ -4,6 +4,7 @@ import { ToastProvider } from '@/providers/toast-provider'
 import { Inter } from 'next/font/google'
 
 import './globals.css'
+import { Toaster } from '@/components/ui/toaster'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -26,6 +27,7 @@ export default async function RootLayout({
          <body className={inter.className}>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
                <ToastProvider />
+               <Toaster />
                <ModalProvider />
                {children}
             </ThemeProvider>

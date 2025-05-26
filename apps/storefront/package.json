@@ -6,7 +6,7 @@
    },
    "license": "MIT",
    "scripts": {
-      "dev": "next dev -p 7777",
+      "dev": "next dev -p 7777 -H 0.0.0.0",
       "build": "next build",
       "start": "next start",
       "lint": "next lint",

@@ -268,6 +268,25 @@ async function main() {
    }
 
    try {
+      for (const product of createdProducts) {
+         await prisma.product.update({
+            where: { id: product.id },
+            data: {
+               crossSellProducts: {
+                  // connect with random products
+                  connect: createdProducts
+                     .filter((p) => p.id !== product.id)
+                     .slice(0, getRandomIntInRange(1, 3))
+                     .map((p) => ({ id: p.id })),
+               }
+            },
+         })
+      }
+   } catch (error) {
+      console.error('Could not create cross-sell products...')
+   }
+
+   try {
       await prisma.author.create({
          data: {
             name: 'Amirhossein Mohammadi',
