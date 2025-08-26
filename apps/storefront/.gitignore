@@ -2,3 +2,6 @@
 /node_modules
 
 sw.json
+
+package-lock.json
+bun.lockb

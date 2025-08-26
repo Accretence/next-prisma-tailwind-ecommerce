@@ -7,6 +7,7 @@ import { getCountInCart, getLocalCart } from '@/lib/cart'
 import { CartContextProvider, useCartContext } from '@/state/Cart'
 import { MinusIcon, PlusIcon, ShoppingBasketIcon, X } from 'lucide-react'
 import { useState } from 'react'
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function CartButton({ product }) {
    return (
@@ -80,6 +81,8 @@ export function ButtonComponent({ product }) {
                product,
                count: 1,
             })
+
+            toast.success(`${product.title} has been added to your cart.`)
 
             dispatchCart(localCart)
          }

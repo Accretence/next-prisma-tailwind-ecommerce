@@ -26,12 +26,15 @@ export const Item = ({ cartItem }) => {
 
    const { product, productId, count } = cartItem
 
-   function findLocalCartIndexById(array, productId) {
-      for (let i = 0; i < array.length; i++) {
-         if (array?.items[i]?.productId === productId) {
+   function findLocalCartIndexById(cart, productId) {
+      const cart_items = cart?.items || [];
+
+      for (let i = 0; i < cart_items.length; i++) {
+         if (cart_items[i]?.productId === productId) {
             return i
          }
       }
+
       return -1
    }
 

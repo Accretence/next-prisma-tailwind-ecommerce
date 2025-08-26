@@ -39,6 +39,8 @@
       "@radix-ui/react-switch": "^1.1.1",
       "@radix-ui/react-tabs": "^1.1.1",
       "@radix-ui/react-toast": "^1.2.2",
+      "@react-email/components": "^0.5.1",
+      "@react-email/render": "^1.2.1",
       "@tanstack/react-table": "^8.20.5",
       "class-variance-authority": "^0.7.0",
       "clsx": "^2.1.1",
@@ -51,16 +53,19 @@
       "next-themes": "^0.3.0",
       "nodemailer": "^6.9.15",
       "react": "18.3.1",
+      "react-day-picker": "^9.9.0",
       "react-dom": "18.3.1",
       "react-hook-form": "^7.53.0",
       "react-hot-toast": "^2.4.1",
       "recharts": "^2.13.0",
+      "ts-node": "^10.9.2",
+      "tsx": "^4.20.5",
       "zod": "^3.23.8",
       "zustand": "^4.5.5"
    },
    "devDependencies": {
       "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-      "@types/node": "22.7.5",
+      "@types/node": "^24.3.0",
       "@types/react": "18.3.11",
       "@types/react-dom": "18.3.1",
       "autoprefixer": "10.4.20",
@@ -73,6 +78,9 @@
       "tailwind-merge": "^2.5.3",
       "tailwindcss": "3.4.13",
       "tailwindcss-animate": "^1.0.7",
-      "typescript": "5.6.3"
+      "typescript": "^5.9.2"
+   },
+   "prisma": {
+      "seed": "tsx prisma/seed.ts"
    }
 }

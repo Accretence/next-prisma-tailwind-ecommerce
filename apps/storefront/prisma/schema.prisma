@@ -120,6 +120,10 @@ model Product {
 
   categories Category[]
 
+  // Cross-sell products (self-relation many-to-many)
+  crossSellProducts Product[] @relation("CrossSellRelation")
+  crossSellOf       Product[] @relation("CrossSellRelation")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

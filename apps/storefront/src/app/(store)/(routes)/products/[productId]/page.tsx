@@ -6,6 +6,8 @@ import type { Metadata, ResolvingMetadata } from 'next'
 import Link from 'next/link'
 
 import { DataSection } from './components/data'
+import { RelatedProducts } from "./components/related_product"
+import { Separator } from "@/components/native/separator"
 
 type Props = {
    params: { productId: string }
@@ -44,6 +46,7 @@ export default async function Product({
       include: {
          brand: true,
          categories: true,
+         crossSellProducts: true
       },
    })
 
@@ -54,6 +57,11 @@ export default async function Product({
             <div className="mt-6 grid grid-cols-1 gap-2 md:grid-cols-3">
                <ImageColumn product={product} />
                <DataSection product={product} />
+            </div>
+            <Separator />
+            <div>
+               <h2 className="mb-4 text-xl font-bold tracking-tight">You might also like</h2>
+               <RelatedProducts products={product.crossSellProducts}/>
             </div>
          </>
       )
