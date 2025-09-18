@@ -1,4 +1,5 @@
 import Carousel from '@/components/native/Carousel'
+import { CrossSellProducts } from '@/components/native/CrossSellProducts'
 import prisma from '@/lib/prisma'
 import { isVariableValid } from '@/lib/utils'
 import { ChevronRightIcon } from 'lucide-react'
@@ -54,6 +55,16 @@ export default async function Product({
             <div className="mt-6 grid grid-cols-1 gap-2 md:grid-cols-3">
                <ImageColumn product={product} />
                <DataSection product={product} />
+            </div>
+            
+            {/* Cross-Sell Products Section */}
+            <div className="mt-12">
+               <CrossSellProducts 
+                  productId={product.id}
+                  limit={4}
+                  title="You might also like"
+                  description="Products that complement this item"
+               />
             </div>
          </>
       )

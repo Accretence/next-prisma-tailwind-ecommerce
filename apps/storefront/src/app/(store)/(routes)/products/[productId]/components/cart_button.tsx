@@ -22,9 +22,21 @@ export function ButtonComponent({ product }) {
 
    const [fetchingCart, setFetchingCart] = useState(false)
 
+   // Debug logging
+   console.log('CartButton state:', {
+      authenticated,
+      loading,
+      cart,
+      productId: product?.id
+   })
+
    function findLocalCartIndexById(array, productId) {
-      for (let i = 0; i < array.length; i++) {
-         if (array?.items[i]?.productId === productId) {
+      if (!array || !array.items || !Array.isArray(array.items)) {
+         return -1
+      }
+      
+      for (let i = 0; i < array.items.length; i++) {
+         if (array.items[i]?.productId === productId) {
             return i
          }
       }
@@ -36,8 +48,15 @@ export function ButtonComponent({ product }) {
          setFetchingCart(true)
 
          const count = getCountInCart({
-            cartItems: cart?.items,
+            cartItems: cart?.items || [],
             productId: product?.id,
+         })
+
+         console.log('Adding to cart:', {
+            authenticated,
+            productId: product?.id,
+            currentCount: count,
+            cartItems: cart?.items
          })
 
          if (authenticated) {
@@ -47,41 +66,46 @@ export function ButtonComponent({ product }) {
                   productId: product?.id,
                   count:
                      getCountInCart({
-                        cartItems: cart?.items,
+                        cartItems: cart?.items || [],
                         productId: product?.id,
                      }) + 1,
                }),
                cache: 'no-store',
                headers: {
-                  'Content-Type': 'application/json-string',
+                  'Content-Type': 'application/json',
                },
             })
 
-            const json = await response.json()
-
-            dispatchCart(json)
+            if (response.ok) {
+               const json = await response.json()
+               dispatchCart(json)
+            } else {
+               console.error('Failed to add to cart:', response.status, response.statusText)
+            }
          }
 
          const localCart = getLocalCart() as any
 
          if (!authenticated && count > 0) {
-            for (let i = 0; i < localCart.items.length; i++) {
-               if (localCart.items[i].productId === product?.id) {
-                  localCart.items[i].count = localCart.items[i].count + 1
+            if (localCart && localCart.items && Array.isArray(localCart.items)) {
+               for (let i = 0; i < localCart.items.length; i++) {
+                  if (localCart.items[i].productId === product?.id) {
+                     localCart.items[i].count = localCart.items[i].count + 1
+                  }
                }
+               dispatchCart(localCart)
             }
-
-            dispatchCart(localCart)
          }
 
          if (!authenticated && count < 1) {
-            localCart.items.push({
-               productId: product?.id,
-               product,
-               count: 1,
-            })
-
-            dispatchCart(localCart)
+            if (localCart && localCart.items && Array.isArray(localCart.items)) {
+               localCart.items.push({
+                  productId: product?.id,
+                  product,
+                  count: 1,
+               })
+               dispatchCart(localCart)
+            }
          }
 
          setFetchingCart(false)
@@ -95,7 +119,7 @@ export function ButtonComponent({ product }) {
          setFetchingCart(true)
 
          const count = getCountInCart({
-            cartItems: cart?.items,
+            cartItems: cart?.items || [],
             productId: product?.id,
          })
 
@@ -106,38 +130,43 @@ export function ButtonComponent({ product }) {
                   productId: product?.id,
                   count:
                      getCountInCart({
-                        cartItems: cart?.items,
+                        cartItems: cart?.items || [],
                         productId: product?.id,
                      }) - 1,
                }),
                cache: 'no-store',
                headers: {
-                  'Content-Type': 'application/json-string',
+                  'Content-Type': 'application/json',
                },
             })
 
-            const json = await response.json()
-
-            dispatchCart(json)
+            if (response.ok) {
+               const json = await response.json()
+               dispatchCart(json)
+            } else {
+               console.error('Failed to remove from cart:', response.status, response.statusText)
+            }
          }
 
          const localCart = getLocalCart() as any
          const index = findLocalCartIndexById(localCart, product?.id)
 
          if (!authenticated && count > 1) {
-            for (let i = 0; i < localCart.items.length; i++) {
-               if (localCart.items[i].productId === product?.id) {
-                  localCart.items[i].count = localCart.items[i].count - 1
+            if (localCart && localCart.items && Array.isArray(localCart.items)) {
+               for (let i = 0; i < localCart.items.length; i++) {
+                  if (localCart.items[i].productId === product?.id) {
+                     localCart.items[i].count = localCart.items[i].count - 1
+                  }
                }
+               dispatchCart(localCart)
             }
-
-            dispatchCart(localCart)
          }
 
          if (!authenticated && count === 1) {
-            localCart.items.splice(index, 1)
-
-            dispatchCart(localCart)
+            if (localCart && localCart.items && Array.isArray(localCart.items) && index >= 0) {
+               localCart.items.splice(index, 1)
+               dispatchCart(localCart)
+            }
          }
 
          setFetchingCart(false)
@@ -154,7 +183,7 @@ export function ButtonComponent({ product }) {
       )
 
    const count = getCountInCart({
-      cartItems: cart?.items,
+      cartItems: cart?.items || [],
       productId: product?.id,
    })
 

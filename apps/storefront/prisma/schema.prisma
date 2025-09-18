@@ -8,148 +8,129 @@ datasource db {
 }
 
 model User {
-  id    String  @id @default(cuid())
-  email String?  @unique
-  phone String? @unique
-
-  name     String?
-  birthday String?
-
+  id                    String          @id @default(cuid())
+  email                 String?         @unique
+  phone                 String?         @unique
+  name                  String?
+  birthday              String?
   OTP                   String?
-  emailUnsubscribeToken String?  @unique @default(cuid())
-  referralCode          String? @unique
-
-  isBanned          Boolean @default(false)
-  isEmailVerified   Boolean @default(false)
-  isPhoneVerified   Boolean @default(false)
-  isEmailSubscribed Boolean @default(false)
-  isPhoneSubscribed Boolean @default(false)
-
-  cart     Cart?
-  wishlist Product[] @relation("Wishlist")
-
-  orders         Order[]
-  addresses      Address[]
-  payments       Payment[]
-  notifications  Notification[]
-  productReviews ProductReview[]
-  errors         Error[]
-  files          File[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  emailUnsubscribeToken String?         @unique @default(cuid())
+  referralCode          String?         @unique
+  isBanned              Boolean         @default(false)
+  isEmailVerified       Boolean         @default(false)
+  isPhoneVerified       Boolean         @default(false)
+  isEmailSubscribed     Boolean         @default(false)
+  isPhoneSubscribed     Boolean         @default(false)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  addresses             Address[]
+  cart                  Cart?
+  errors                Error[]
+  files                 File[]
+  notifications         Notification[]
+  orders                Order[]
+  payments              Payment[]
+  productReviews        ProductReview[]
+  wishlist              Product[]       @relation("Wishlist")
 }
 
 model Cart {
-  user   User       @relation(fields: [userId], references: [id])
-  userId String     @id
-  items  CartItem[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  userId    String     @id
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
 }
 
 model CartItem {
-  cart      Cart    @relation(fields: [cartId], references: [userId])
   cartId    String
-  product   Product @relation(fields: [productId], references: [id])
   productId String
   count     Int
+  cart      Cart    @relation(fields: [cartId], references: [userId])
+  product   Product @relation(fields: [productId], references: [id])
 
   @@unique([cartId, productId], name: "UniqueCartItem")
 }
 
 model Owner {
-  id     String  @id @default(cuid())
-  email  String  @unique
-  phone  String? @unique
-  name   String?
-  avatar String?
-  OTP    String?
-
+  id        String   @id @default(cuid())
+  email     String   @unique
+  phone     String?  @unique
+  name      String?
+  avatar    String?
+  OTP       String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Author {
-  id     String  @id @default(cuid())
-  email  String  @unique
-  phone  String? @unique
-  name   String?
-  avatar String?
-  OTP    String?
-
-  blogs Blog[]
-
+  id        String   @id @default(cuid())
+  email     String   @unique
+  phone     String?  @unique
+  name      String?
+  avatar    String?
+  OTP       String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  blogs     Blog[]
 }
 
 model Brand {
-  id          String  @id @default(cuid())
-  title       String  @unique
+  id          String    @id @default(cuid())
+  title       String    @unique
   description String?
   logo        String?
-
-  products Product[]
+  products    Product[]
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  images      String[]
-  keywords    String[]
-  metadata    Json?
-
-  price    Float @default(100)
-  discount Float @default(0)
-  stock    Int   @default(0)
-
-  isPhysical  Boolean @default(true)
-  isAvailable Boolean @default(false)
-  isFeatured  Boolean @default(false)
-
-  orders         OrderItem[]
+  id             String          @id @default(cuid())
+  title          String
+  description    String?
+  images         String[]
+  keywords       String[]
+  metadata       Json?
+  price          Float           @default(100)
+  discount       Float           @default(0)
+  stock          Int             @default(0)
+  isPhysical     Boolean         @default(true)
+  isAvailable    Boolean         @default(false)
+  isFeatured     Boolean         @default(false)
+  brandId        String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   cartItems      CartItem[]
-  wishlists      User[]          @relation("Wishlist")
+  orders         OrderItem[]
+  brand          Brand           @relation(fields: [brandId], references: [id])
   productReviews ProductReview[]
-
-  brand   Brand  @relation(fields: [brandId], references: [id])
-  brandId String
-
-  categories Category[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  categories     Category[]      @relation("CategoryToProduct")
+  Product_A      Product[]       @relation("CrossSellProducts")
+  Product_B      Product[]       @relation("CrossSellProducts")
+  wishlists      User[]          @relation("Wishlist")
 
   @@index([brandId])
 }
 
 model Category {
-  id          String  @id @default(cuid())
-  title       String  @unique
+  id          String    @id @default(cuid())
+  title       String    @unique
   description String?
-
-  products Product[]
-  banners  Banner[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  banners     Banner[]  @relation("BannerToCategory")
+  products    Product[] @relation("CategoryToProduct")
 }
 
 model ProductReview {
-  id     String @id @default(cuid())
-  text   String
-  rating Int
-
-  product   Product @relation(fields: [productId], references: [id])
+  id        String   @id @default(cuid())
+  text      String
+  rating    Int
   productId String
-  user      User    @relation(fields: [userId], references: [id])
   userId    String
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
   @@unique([productId, userId], name: "UniqueProductProductReview")
   @@index([userId])
@@ -157,32 +138,27 @@ model ProductReview {
 }
 
 model Order {
-  id     String          @id @default(cuid())
-  number Int             @unique @default(autoincrement())
-  status OrderStatusEnum
-
-  total    Float @default(100)
-  shipping Float @default(100)
-  payable  Float @default(100)
-  tax      Float @default(100)
-  discount Float @default(0)
-
-  isPaid      Boolean @default(false)
-  isCompleted Boolean @default(false)
-
-  payments   Payment[]
-  orderItems OrderItem[]
-  refund     Refund?
-
-  discountCode   DiscountCode? @relation(fields: [discountCodeId], references: [id])
+  id             String          @id @default(cuid())
+  number         Int             @unique @default(autoincrement())
+  status         OrderStatusEnum
+  total          Float           @default(100)
+  shipping       Float           @default(100)
+  payable        Float           @default(100)
+  tax            Float           @default(100)
+  discount       Float           @default(0)
+  isPaid         Boolean         @default(false)
+  isCompleted    Boolean         @default(false)
   discountCodeId String?
-  address        Address?      @relation(fields: [addressId], references: [id])
   addressId      String?
-  user           User          @relation(fields: [userId], references: [id])
   userId         String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  address        Address?        @relation(fields: [addressId], references: [id])
+  discountCode   DiscountCode?   @relation(fields: [discountCodeId], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
+  orderItems     OrderItem[]
+  payments       Payment[]
+  refund         Refund?
 
   @@index([userId])
   @@index([addressId])
@@ -190,15 +166,145 @@ model Order {
 }
 
 model OrderItem {
-  order     Order   @relation(fields: [orderId], references: [id])
   orderId   String
-  product   Product @relation(fields: [productId], references: [id])
   productId String
   count     Int
   price     Float
   discount  Float
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 
   @@unique([orderId, productId], name: "UniqueOrderItem")
+}
+
+model Address {
+  id         String   @id @default(cuid())
+  country    String   @default("IRI")
+  address    String
+  city       String
+  phone      String
+  postalCode String
+  userId     String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  orders     Order[]
+
+  @@index([userId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  content   String
+  isRead    Boolean  @default(false)
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model DiscountCode {
+  id                String   @id @default(cuid())
+  code              String   @unique
+  stock             Int      @default(1)
+  description       String?
+  percent           Int
+  maxDiscountAmount Float    @default(1)
+  startDate         DateTime
+  endDate           DateTime
+  createdAt         DateTime @default(now())
+  order             Order[]
+}
+
+model Refund {
+  id        String   @id @default(cuid())
+  amount    Float
+  reason    String
+  orderId   String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  order     Order    @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+}
+
+model Payment {
+  id           String            @id @default(cuid())
+  number       Int               @unique @default(autoincrement())
+  status       PaymentStatusEnum
+  refId        String            @unique
+  cardPan      String?
+  cardHash     String?
+  fee          Float?
+  isSuccessful Boolean           @default(false)
+  payable      Float
+  providerId   String
+  userId       String
+  orderId      String
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  order        Order             @relation(fields: [orderId], references: [id])
+  provider     PaymentProvider   @relation(fields: [providerId], references: [id])
+  user         User              @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([providerId])
+  @@index([orderId])
+}
+
+model PaymentProvider {
+  id          String    @id @default(cuid())
+  title       String    @unique
+  description String?
+  websiteUrl  String?
+  isActive    Boolean   @default(false)
+  orders      Payment[]
+}
+
+model Error {
+  id        String   @id @default(cuid())
+  error     String
+  userId    String?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model File {
+  id        String   @id @default(cuid())
+  url       String
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Blog {
+  slug        String   @id
+  title       String
+  image       String
+  description String
+  content     String?
+  categories  String[]
+  keywords    String[]
+  authorId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  author      Author   @relation(fields: [authorId], references: [id])
+
+  @@index([authorId])
+}
+
+model Banner {
+  id         String     @id @default(cuid())
+  label      String
+  image      String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  categories Category[] @relation("BannerToCategory")
 }
 
 enum OrderStatusEnum {
@@ -213,164 +319,9 @@ enum OrderStatusEnum {
   Denied
 }
 
-model Address {
-  id         String @id @default(cuid())
-  country    String @default("IRI")
-  address    String
-  city       String
-  phone      String
-  postalCode String
-
-  user   User    @relation(fields: [userId], references: [id])
-  userId String
-  orders Order[]
-
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-}
-
-model Notification {
-  id      String  @id @default(cuid())
-  content String
-  isRead  Boolean @default(false)
-
-  user   User   @relation(fields: [userId], references: [id])
-  userId String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-}
-
-model DiscountCode {
-  id                String   @id @default(cuid())
-  code              String   @unique
-  stock             Int      @default(1)
-  description       String?
-  percent           Int
-  maxDiscountAmount Float    @default(1)
-  startDate         DateTime
-  endDate           DateTime
-
-  order Order[]
-
-  createdAt DateTime @default(now())
-}
-
-model Refund {
-  id     String @id @default(cuid())
-  amount Float
-  reason String
-
-  order   Order  @relation(fields: [orderId], references: [id])
-  orderId String @unique
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([orderId])
-}
-
-model Payment {
-  id     String            @id @default(cuid())
-  number Int               @unique @default(autoincrement())
-  status PaymentStatusEnum
-
-  refId    String  @unique
-  cardPan  String?
-  cardHash String?
-  fee      Float?
-
-  isSuccessful Boolean @default(false)
-  payable      Float
-
-  provider   PaymentProvider @relation(fields: [providerId], references: [id])
-  providerId String
-  user       User            @relation(fields: [userId], references: [id])
-  userId     String
-  order      Order           @relation(fields: [orderId], references: [id])
-  orderId    String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-  @@index([providerId])
-  @@index([orderId])
-}
-
 enum PaymentStatusEnum {
   Processing
   Paid
   Failed
   Denied
-}
-
-model PaymentProvider {
-  id          String  @id @default(cuid())
-  title       String  @unique
-  description String?
-  websiteUrl  String?
-  isActive    Boolean @default(false)
-
-  orders Payment[]
-}
-
-model Error {
-  id String @id @default(cuid())
-
-  error String
-
-  user   User?   @relation(fields: [userId], references: [id])
-  userId String?
-
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-}
-
-model File {
-  id String @id @default(cuid())
-
-  url String
-
-  user   User   @relation(fields: [userId], references: [id])
-  userId String
-
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-}
-
-model Blog {
-  slug        String  @id
-  title       String
-  image       String
-  description String
-  content     String? @db.Text
-
-  categories String[]
-  keywords   String[]
-
-  author   Author @relation(fields: [authorId], references: [id])
-  authorId String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([authorId])
-}
-
-model Banner {
-  id String @id @default(cuid())
-
-  label String
-  image String
-
-  categories Category[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }

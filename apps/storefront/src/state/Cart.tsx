@@ -31,8 +31,10 @@ export const CartContextProvider = ({ children }) => {
       if (isVariableValid(user)) {
          setCart(user?.cart)
          writeLocalCart(user?.cart)
+      } else {
+         const localCart = getLocalCart()
+         setCart(localCart)
       }
-      if (!isVariableValid(user)) setCart(getLocalCart())
 
       setLoading(false)
    }
@@ -41,9 +43,16 @@ export const CartContextProvider = ({ children }) => {
       if (isVariableValid(user)) {
          setCart(user?.cart)
          writeLocalCart(user?.cart)
+      } else {
+         const localCart = getLocalCart()
+         if (!localCart || !localCart.items) {
+            const defaultCart = { items: [] }
+            writeLocalCart(defaultCart)
+            setCart(defaultCart)
+         } else {
+            setCart(localCart)
+         }
       }
-      if (!isVariableValid(getLocalCart())) writeLocalCart({ items: [] })
-      if (!isVariableValid(user)) setCart(getLocalCart())
 
       setLoading(false)
    }, [user])

@@ -1,41 +1,97 @@
 import { ProductGrid, ProductSkeletonGrid } from '@/components/native/Product'
+import { ProductFilter } from '@/components/native/ProductFilter'
+import { Pagination } from '@/components/native/Pagination'
 import { Heading } from '@/components/native/heading'
 import { Separator } from '@/components/native/separator'
 import prisma from '@/lib/prisma'
 import { isVariableValid } from '@/lib/utils'
 
-import {
-   AvailableToggle,
-   BrandCombobox,
-   CategoriesCombobox,
-   SortBy,
-} from './components/options'
-
 export default async function Products({ searchParams }) {
-   const { sort, isAvailable, brand, category, page = 1 } = searchParams ?? null
+   const { 
+      search, 
+      minPrice, 
+      maxPrice, 
+      brand, 
+      category, 
+      sort, 
+      isAvailable, 
+      page = 1 
+   } = searchParams ?? {}
+
+   // Build where clause for server-side filtering
+   const where: any = {}
+
+   // Text search across title, description, and keywords
+   if (search) {
+      where.OR = [
+         {
+            title: {
+               contains: search,
+               mode: 'insensitive',
+            },
+         },
+         {
+            description: {
+               contains: search,
+               mode: 'insensitive',
+            },
+         },
+         {
+            keywords: {
+               hasSome: [search],
+            },
+         },
+      ]
+   }
+
+   // Price range filter
+   if (minPrice || maxPrice) {
+      where.price = {}
+      if (minPrice) {
+         where.price.gte = parseFloat(minPrice)
+      }
+      if (maxPrice) {
+         where.price.lte = parseFloat(maxPrice)
+      }
+   }
+
+   // Brand filter
+   if (brand) {
+      where.brand = {
+         title: {
+            contains: brand,
+            mode: 'insensitive',
+         },
+      }
+   }
+
+   // Category filter
+   if (category) {
+      where.categories = {
+         some: {
+            title: {
+               contains: category,
+               mode: 'insensitive',
+            },
+         },
+      }
+   }
+
+   // Availability filter
+   if (isAvailable === 'true') {
+      where.isAvailable = true
+   }
 
    const orderBy = getOrderBy(sort)
 
    const brands = await prisma.brand.findMany()
    const categories = await prisma.category.findMany()
+   
+   // Get total count for pagination
+   const totalCount = await prisma.product.count({ where })
+   
    const products = await prisma.product.findMany({
-      where: {
-         isAvailable: isAvailable == 'true' || sort ? true : undefined,
-         brand: {
-            title: {
-               contains: brand,
-               mode: 'insensitive',
-            },
-         },
-         categories: {
-            some: {
-               title: {
-                  contains: category,
-                  mode: 'insensitive',
-               },
-            },
-         },
-      },
+      where,
       orderBy,
       skip: (page - 1) * 12,
       take: 12,
@@ -49,23 +105,31 @@ export default async function Products({ searchParams }) {
       <>
          <Heading
             title="Products"
-            description="Below is a list of products you have in your cart."
+            description="Discover our amazing collection of products with advanced filtering options."
          />
-         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
-            <SortBy initialData={sort} />
-            <CategoriesCombobox
-               initialCategory={category}
+         
+         <div className="mb-6">
+            <ProductFilter 
+               brands={brands}
                categories={categories}
+               searchParams={searchParams}
             />
-            <BrandCombobox initialBrand={brand} brands={brands} />
-            <AvailableToggle initialData={isAvailable} />
          </div>
+         
          <Separator />
+         
          {isVariableValid(products) ? (
             <ProductGrid products={products} />
          ) : (
             <ProductSkeletonGrid />
          )}
+         
+         <Pagination
+            currentPage={Number(page)}
+            totalPages={Math.ceil(totalCount / 12)}
+            totalItems={totalCount}
+            itemsPerPage={12}
+         />
       </>
    )
 }
@@ -76,9 +140,7 @@ function getOrderBy(sort) {
    switch (sort) {
       case 'featured':
          orderBy = {
-            orders: {
-               _count: 'desc',
-            },
+            isFeatured: 'desc',
          }
          break
       case 'most_expensive':
@@ -91,12 +153,19 @@ function getOrderBy(sort) {
             price: 'asc',
          }
          break
-
+      case 'title_asc':
+         orderBy = {
+            title: 'asc',
+         }
+         break
+      case 'title_desc':
+         orderBy = {
+            title: 'desc',
+         }
+         break
       default:
          orderBy = {
-            orders: {
-               _count: 'desc',
-            },
+            isFeatured: 'desc',
          }
          break
    }

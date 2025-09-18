@@ -51,6 +51,11 @@ export function MainNav({
          label: 'Codes',
          active: pathname.includes(`/codes`),
       },
+      {
+         href: `/reports`,
+         label: 'Reports',
+         active: pathname.includes(`/reports`),
+      },
    ]
 
    return (

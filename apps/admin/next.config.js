@@ -9,4 +9,8 @@ module.exports = {
          },
       ],
    },
+   env: {
+      JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
+      DATABASE_URL: process.env.DATABASE_URL,
+   },
 }
