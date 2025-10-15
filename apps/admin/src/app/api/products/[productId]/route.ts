@@ -69,7 +69,13 @@ export async function PATCH(
       }
 
       const {
-         data: { title, price, discount, stock, isFeatured, isAvailable },
+         title,
+         price,
+         discount,
+         stock,
+         isFeatured,
+         isAvailable,
+         crossSellProducts,
       } = await req.json()
 
       const product = await prisma.product.update({
@@ -83,6 +89,14 @@ export async function PATCH(
             stock,
             isFeatured,
             isAvailable,
+            ...(Array.isArray(crossSellProducts)
+               ? {
+                    crossSellProducts: {
+                       set: [],
+                       connect: crossSellProducts.map((id: string) => ({ id })),
+                    },
+                 }
+               : {}),
          },
       })
 

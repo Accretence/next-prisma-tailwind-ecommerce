@@ -6,6 +6,7 @@ import { useAuthenticated } from '@/hooks/useAuthentication'
 import { getCountInCart, getLocalCart } from '@/lib/cart'
 import { CartContextProvider, useCartContext } from '@/state/Cart'
 import { MinusIcon, PlusIcon, ShoppingBasketIcon, X } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 import { useState } from 'react'
 
 export default function CartButton({ product }) {
@@ -85,6 +86,7 @@ export function ButtonComponent({ product }) {
          }
 
          setFetchingCart(false)
+         toast.success('Added to cart', { id: `add-${product?.id}` })
       } catch (error) {
          console.error({ error })
       }

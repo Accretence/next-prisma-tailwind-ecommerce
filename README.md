@@ -100,3 +100,63 @@ Follow the deployment guides for [Vercel](https://create.t3.gg/en/deployment/ver
 This project is MIT-licensed and is free to use and modify for your own projects. Check the [LICENSE](./LICENSE) file for details.
 
 Created by [Amirhossein Mohammadi](https://github.com/sesto-dev).
+
+## ✨ What’s new in this assessment
+
+### 1) Revamped Product Filters (Storefront)
+- Filters: text search (`q`), price range (`minPrice`/`maxPrice`), categories (multi via `categories=a,b,c`), brand, availability, and sort (featured, most/least expensive, A–Z/Z–A).
+- UX: URL-driven filters with instant client feedback; local skeleton shows while the route updates.
+
+Notes:
+- Server query handles OR text search across `title`, `description`, and `keywords` and respects price range.
+- Category filter is case-insensitive and supports multi-select.
+
+### 2) Admin Reports Page
+- Filters: date range (`from`, `to`), brand, categories (multi)
+- Reports:
+  - Orders grouped by date (count + total)
+  - Top-selling products (by quantity)
+- UX: Filters remain visible; tables show local skeleton while data reloads.
+
+### 3) Cross‑Sell Products
+- Prisma: Added optional self many‑to‑many relation on `Product`:
+  - `crossSellProducts Product[] @relation("CrossSell")`
+  - `crossSellOf Product[] @relation("CrossSell")`
+- Admin UI: In the product form, multi-select “Cross‑sell Products”.
+- API: Admin `PATCH /api/products/[productId]` accepts `crossSellProducts: string[]` to connect relations.
+- Storefront:
+  - Product page shows a “You might also like” grid if cross‑sells exist.
+  - Cart page aggregates cross‑sell suggestions for items in cart.
+  - Add-to-cart shows a toast confirmation.
+
+## 🔗 routes and endpoints
+
+Storefront
+- Products listing with filters: `GET /products` (URL query‑driven)
+- Product details with cross‑sell: `GET /products/[productId]`
+- Cart API: `POST /api/cart` (existing; unchanged contract)
+
+Admin
+- Reports page: `GET /reports`
+- Product details edit (includes cross‑sell): `GET /products/[productId]`
+- Update product (cross‑sell connect): `PATCH /api/products/[productId]`
+  Body example:
+```json
+{
+  "title": "New title",
+  "price": 10,
+  "discount": 0,
+  "stock": 5,
+  "isFeatured": false,
+  "isAvailable": true,
+  "crossSellProducts": ["<productId1>", "<productId2>"]
+}
+```
+
+## 🧠 Design decisions & assumptions
+- Filters as URL state: keeps UI shareable/bookmarkable and allows server rendering for result sets while showing immediate local skeletons.
+- Case‑insensitive category/brand filters to match human input; multi‑category via `OR`.
+- Price filtering honors discounted effective price on storefront lists.
+- Reports perform narrow queries with optional date range; local skeletons keep filters visible.
+- Cross‑sell chosen as self many‑to‑many for flexibility; admin writes via `connect`. Read paths include minimal fields for cards.
+- Cart feedback is intentionally lightweight (toast) to avoid interrupting checkout flow while still acknowledging user action.
