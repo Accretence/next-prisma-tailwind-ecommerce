@@ -120,6 +120,9 @@ model Product {
 
   categories Category[]
 
+  crossSellProducts Product[] @relation("CrossSell")
+  crossSellOf       Product[] @relation("CrossSell")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

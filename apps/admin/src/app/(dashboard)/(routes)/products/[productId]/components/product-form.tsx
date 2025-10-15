@@ -26,6 +26,10 @@ import { Separator } from '@/components/ui/separator'
 import type { ProductWithIncludes } from '@/types/prisma'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Category } from '@prisma/client'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { ChevronsUpDown, Check } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Trash } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -42,6 +46,7 @@ const formSchema = z.object({
    categoryId: z.string().min(1),
    isFeatured: z.boolean().default(false).optional(),
    isAvailable: z.boolean().default(false).optional(),
+   crossSellProducts: z.array(z.string()).optional(),
 })
 
 type ProductFormValues = z.infer<typeof formSchema>
@@ -49,12 +54,10 @@ type ProductFormValues = z.infer<typeof formSchema>
 interface ProductFormProps {
    initialData: ProductWithIncludes | null
    categories: Category[]
+   products: { id: string; title: string }[]
 }
 
-export const ProductForm: React.FC<ProductFormProps> = ({
-   initialData,
-   categories,
-}) => {
+export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, products }) => {
    const params = useParams()
    const router = useRouter()
 
@@ -82,6 +85,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
            categoryId: '---',
            isFeatured: false,
            isAvailable: false,
+           crossSellProducts: [],
         }
 
    const form = useForm<ProductFormValues>({
@@ -334,6 +338,48 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                                  This product will appear in the store.
                               </FormDescription>
                            </div>
+                        </FormItem>
+                     )}
+                  />
+                  <FormField
+                     control={form.control}
+                     name="crossSellProducts"
+                     render={({ field }) => (
+                        <FormItem>
+                           <FormLabel>Cross-sell Products</FormLabel>
+                           <Popover>
+                              <PopoverTrigger asChild>
+                                 <Button variant="outline" className="justify-between">
+                                    {field.value?.length ? `${field.value.length} selected` : 'Select products...'}
+                                    <ChevronsUpDown className="ml-2 h-4 shrink-0 opacity-50" />
+                                 </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-[320px] p-0">
+                                 <Command>
+                                    <CommandInput placeholder="Search products..." />
+                                    <CommandList>
+                                       <CommandEmpty>No products found.</CommandEmpty>
+                                       <CommandGroup>
+                                          {products.map((p) => {
+                                             const checked = field.value?.includes(p.id)
+                                             return (
+                                                <CommandItem key={p.id} value={p.title} onSelect={() => {
+                                                   const next = checked
+                                                      ? (field.value || []).filter((id) => id !== p.id)
+                                                      : [ ...(field.value || []), p.id ]
+                                                   field.onChange(next)
+                                                }}>
+                                                   <Check className={cn('mr-2 h-4', checked ? 'opacity-100' : 'opacity-0')} />
+                                                   {p.title}
+                                                </CommandItem>
+                                             )
+                                          })}
+                                       </CommandGroup>
+                                    </CommandList>
+                                 </Command>
+                              </PopoverContent>
+                           </Popover>
+                           <FormDescription>Select products to recommend alongside this one.</FormDescription>
                         </FormItem>
                      )}
                   />

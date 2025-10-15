@@ -44,6 +44,7 @@ export default async function Product({
       include: {
          brand: true,
          categories: true,
+         crossSellProducts: { include: { brand: true, categories: true } },
       },
    })
 
@@ -55,6 +56,25 @@ export default async function Product({
                <ImageColumn product={product} />
                <DataSection product={product} />
             </div>
+            {isVariableValid(product.crossSellProducts) && product.crossSellProducts.length > 0 && (
+               <div className="mt-8">
+                  <h3 className="mb-3 text-lg font-medium">You might also like</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                     {product.crossSellProducts.map((p) => (
+                        <Link key={p.id} href={`/products/${p.id}`} className="block rounded border hover:shadow-sm transition">
+                           <div className="relative h-40 w-full">
+                              {/* fallback first image */}
+                              <img src={p.images?.[0]} alt={p.title} className="h-40 w-full object-cover rounded-t" />
+                           </div>
+                           <div className="p-2">
+                              <div className="text-sm font-medium line-clamp-1">{p.title}</div>
+                              <div className="text-xs text-neutral-500">{p.brand?.title}</div>
+                           </div>
+                        </Link>
+                     ))}
+                  </div>
+               </div>
+            )}
          </>
       )
    }
