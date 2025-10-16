@@ -26,9 +26,10 @@ export const Item = ({ cartItem }) => {
 
    const { product, productId, count } = cartItem
 
-   function findLocalCartIndexById(array, productId) {
-      for (let i = 0; i < array.length; i++) {
-         if (array?.items[i]?.productId === productId) {
+   function findLocalCartIndexById(cart, productId) {
+      const cart_items = cart?.items || [];
+      for (let i = 0; i < cart_items.length; i++) {
+         if (cart_items[i]?.productId === productId) {
             return i
          }
       }
@@ -129,6 +130,7 @@ export const Item = ({ cartItem }) => {
 
             const json = await response.json()
             dispatchCart(json)
+            window.dispatchEvent(new Event('cartUpdated'))
          }
 
          const localCart = getLocalCart() as any
@@ -154,6 +156,7 @@ export const Item = ({ cartItem }) => {
             localCart.items.splice(index, 1)
 
             dispatchCart(localCart)
+            window.dispatchEvent(new Event('cartUpdated'))
          }
 
          setFetchingCart(false)

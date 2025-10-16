@@ -17,6 +17,14 @@ export const ProductGrid = ({
 }: {
    products: ProductWithIncludes[]
 }) => {
+   if (!products || products.length === 0) {
+      return (
+         <div className="flex items-center justify-center h-40">
+            <p className="text-neutral-500 text-sm">No products available</p>
+         </div>
+      )
+   }
+
    return (
       <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
          {products.map((product) => (

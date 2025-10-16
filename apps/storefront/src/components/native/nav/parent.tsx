@@ -1,12 +1,13 @@
 'use client'
 
+import { CartCount } from '@/app/(store)/(routes)/products/[productId]/components/cart_count'
 import { CommandMenu } from '@/components/composites/command'
 import { MobileNav } from '@/components/native//nav/mobile'
 import { UserNav } from '@/components/native//nav/user'
 import { MainNav } from '@/components/native/nav/desktop'
 import { Button } from '@/components/ui/button'
 import { useAuthenticated } from '@/hooks/useAuthentication'
-import { LogInIcon, MoonIcon, ShoppingBasketIcon, SunIcon } from 'lucide-react'
+import { LogInIcon, MoonIcon, SunIcon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
 
@@ -35,7 +36,7 @@ export function CartNav() {
    return (
       <Link href="/cart">
          <Button size="icon" variant="outline" className="h-9">
-            <ShoppingBasketIcon className="h-4" />
+            <CartCount />
          </Button>
       </Link>
    )

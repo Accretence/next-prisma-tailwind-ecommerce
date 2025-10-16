@@ -7,6 +7,7 @@ import { getCountInCart, getLocalCart } from '@/lib/cart'
 import { CartContextProvider, useCartContext } from '@/state/Cart'
 import { MinusIcon, PlusIcon, ShoppingBasketIcon, X } from 'lucide-react'
 import { useState } from 'react'
+import toast from 'react-hot-toast';
 
 export default function CartButton({ product }) {
    return (
@@ -60,6 +61,7 @@ export function ButtonComponent({ product }) {
             const json = await response.json()
 
             dispatchCart(json)
+            window.dispatchEvent(new Event('cartUpdated'))
          }
 
          const localCart = getLocalCart() as any
@@ -80,8 +82,10 @@ export function ButtonComponent({ product }) {
                product,
                count: 1,
             })
-
+            
+            toast.success(`${product.title} has been successfully added to your cart.`)
             dispatchCart(localCart)
+            window.dispatchEvent(new Event('cartUpdated'))
          }
 
          setFetchingCart(false)
@@ -119,6 +123,7 @@ export function ButtonComponent({ product }) {
             const json = await response.json()
 
             dispatchCart(json)
+            window.dispatchEvent(new Event('cartUpdated'))
          }
 
          const localCart = getLocalCart() as any
@@ -137,7 +142,9 @@ export function ButtonComponent({ product }) {
          if (!authenticated && count === 1) {
             localCart.items.splice(index, 1)
 
+            toast.success(`${product.title} has been successfully removed to your cart.`)
             dispatchCart(localCart)
+            window.dispatchEvent(new Event('cartUpdated'))
          }
 
          setFetchingCart(false)

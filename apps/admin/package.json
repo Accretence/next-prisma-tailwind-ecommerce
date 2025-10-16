@@ -16,6 +16,9 @@
       "db:seed": "npx prisma db seed",
       "db:studio": "npx prisma studio"
    },
+   "prisma": {
+      "seed": "ts-node prisma/seed.ts"
+   },
    "dependencies": {
       "@hookform/resolvers": "^3.9.0",
       "@persepolis/mail": "^1.0.9",
@@ -39,6 +42,8 @@
       "@radix-ui/react-switch": "^1.1.1",
       "@radix-ui/react-tabs": "^1.1.1",
       "@radix-ui/react-toast": "^1.2.2",
+      "@react-email/components": "^0.5.1",
+      "@react-email/render": "^1.2.1",
       "@tanstack/react-table": "^8.20.5",
       "class-variance-authority": "^0.7.0",
       "clsx": "^2.1.1",
@@ -51,6 +56,7 @@
       "next-themes": "^0.3.0",
       "nodemailer": "^6.9.15",
       "react": "18.3.1",
+      "react-day-picker": "^9.11.1",
       "react-dom": "18.3.1",
       "react-hook-form": "^7.53.0",
       "react-hot-toast": "^2.4.1",

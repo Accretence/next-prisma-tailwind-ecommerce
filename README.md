@@ -51,31 +51,53 @@ You can [read more about environment variables here](https://nextjs.org/docs/bas
 
 ## 🏃‍♂️ Getting Started Locally
 
-Clone the repository.
+#### Clone the repository.
 
 ```bash
-git clone https://github.com/sesto-dev/next-prisma-tailwind-ecommerce
+git clone https://github.com/CesarF1204/next-prisma-tailwind-ecommerce.git
 ```
 
-Navigate to each folder in the `apps` folder and and set the variables.
+#### Navigate to my branch: *cesar-francisco-vocalmeet-assessment*
+```bash
+git checkout cesar-francisco-vocalmeet-assessment
+```
+
+#### Navigate to each folder in the `apps` folder and and set the variables.
 
 ```sh
 cp .env.example .env
 ```
 
-Get all dependencies sorted.
+#### Get all dependencies sorted.
 
 ```sh
 bun install
 ```
 
-Bring your database to life with pushing the database schema.
+#### Bring your database to life with pushing the database schema.
 
 ```bash
 bun run db:push
 ```
 
-```sh
+#### Run the projects
+
+Storefront
+
+```bash
+cd apps/storefront
+```
+
+```bash
+bun run dev
+```
+Admin
+
+```bash
+cd apps/admin
+```
+
+```bash
 bun run dev
 ```
 
@@ -90,6 +112,78 @@ This project exposes a package.json script for accessing prisma via `bun run db:
 ### Making changes to the database schema
 
 Make changes to your database by modifying `prisma/schema.prisma`.
+
+# 🛍️ Storefront & Admin Enhancements
+
+This update focuses on improving the **storefront filtering system**, introducing a new **Admin Reporting Page**, and enhancing the **Prisma DB model** to support **cross-sell functionality**. Additionally, several UI and UX improvements were added to both the storefront and admin panel.
+
+---
+
+## 🚀 Features Overview
+
+### 1. 🧭 Rebuild the Product Page Filter
+Enhances the storefront by providing a more dynamic and user-friendly product filtering experience.
+
+#### 🧩 Filter Options
+- **Text Search:** Search products by keywords (title or description).
+- **Price Range:** Filter products within a specified price range.
+- **Categories:** Select one or multiple product categories.
+- **Brand:** Filter by product brand.
+- **Order Selector:** Sort products by:
+  - Most expensive
+  - Cheapest
+  - Title (A–Z)
+  - Title (Z–A)
+
+#### 🧹 Additional Enhancements
+- Added a **Reset Filters** button to clear all applied filters including price range, categories, brand, and sort order.
+
+---
+
+### 2. 📊 Admin Reporting Page
+Introduces a new admin route `/admin/reports` for generating and analyzing order reports.
+
+#### 🔒 Access Control
+- The reporting page is **restricted to administrators only**.
+
+#### 📈 Reports Overview
+- **Summary of Orders:** Display total orders grouped by date.
+- **Most-Sold Products:** List or table view of top-selling products.
+
+#### 🎛️ Report Filter Options
+- **Date Range:** Filter reports by a specific time period.
+- **Categories:** Filter report data based on product categories.
+- **Brand:** Filter report data by product brand.
+
+#### 📊 Data Presentation
+- Visualize report data through **interactive graphs** and well-organized tables.
+
+#### 💰 Additional Admin Features
+- Display **Total Orders** and **Total Sales** metrics on the `/admin/reports` page.
+
+---
+
+### 3. 🔗 Extend Prisma DB Model & Enhance Cross-Sell Functionality
+Updates the Prisma schema to support product cross-selling and improves the storefront experience.
+
+#### 🗃️ Prisma Schema Update
+Added a new self-relation many-to-many field on the `Product` model:
+
+```prisma
+// Cross-sell products (self-relation many-to-many)
+crossSellProducts Product[] @relation("CrossSell")
+crossSellOf       Product[] @relation("CrossSell")
+```
+- Allows linking multiple products as cross-sell options.
+- Includes a seed script to populate the _crossSell table.
+
+#### 🗃️ Storefront Integration
+- **Product Page:** Displays cross-sell products under a "Related Products" section if available.
+- **Cart Page:** Displays cross-sell suggestions based on items currently in the cart.
+
+#### 🎉 Improved Cart Feedback
+- Added a toast notification to confirm when a product is added to the cart.
+- Displayed cart item count beside the cart icon for better user feedback.
 
 ## 🛸 How to Deploy the Project
 
