@@ -1,13 +1,23 @@
 interface HeadingProps {
    title: string
    description: string
+   specialDiv?: React.ReactNode
 }
 
-export const Heading: React.FC<HeadingProps> = ({ title, description }) => {
+export const Heading: React.FC<HeadingProps> = ({
+   title,
+   description,
+   specialDiv,
+}) => {
    return (
-      <div className="my-4">
-         <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
-         <p className="text-sm text-muted-foreground">{description}</p>
+      <div className="my-4 flex  justify-between  md:flex-row flex-col gap-4">
+         <div>
+            <h2 className="text-xl font-bold tracking-tight leading-tight">
+               {title}
+            </h2>
+            <p className="text-xs text-muted-foreground">{description}</p>
+         </div>
+         {specialDiv}
       </div>
    )
 }

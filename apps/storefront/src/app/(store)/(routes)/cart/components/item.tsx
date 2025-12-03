@@ -3,26 +3,23 @@
 import { Spinner } from '@/components/native/icons'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-   Card,
-   CardContent,
-   CardDescription,
-   CardFooter,
-   CardHeader,
-   CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { useAuthenticated } from '@/hooks/useAuthentication'
-import { getCountInCart, getLocalCart, writeLocalCart } from '@/lib/cart'
+import { getCountInCart, getLocalCart } from '@/lib/cart'
 import { useCartContext } from '@/state/Cart'
-import { MinusIcon, PlusIcon, X } from 'lucide-react'
+import { MinusIcon, PlusIcon, Trash, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
+
+import QuantityInputComponent from '../../products/[productId]/components/quantity-input-component'
 
 export const Item = ({ cartItem }) => {
    const { authenticated } = useAuthenticated()
    const { loading, cart, refreshCart, dispatchCart } = useCartContext()
    const [fetchingCart, setFetchingCart] = useState(false)
+   const [quantity, setQuantity] = useState(cartItem.count)
 
    const { product, productId, count } = cartItem
 
@@ -61,8 +58,7 @@ export const Item = ({ cartItem }) => {
                method: 'POST',
                body: JSON.stringify({
                   productId,
-                  count:
-                     getCountInCart({ cartItems: cart?.items, productId }) + 1,
+                  count: quantity,
                }),
                cache: 'no-store',
                headers: {
@@ -118,8 +114,7 @@ export const Item = ({ cartItem }) => {
                method: 'POST',
                body: JSON.stringify({
                   productId,
-                  count:
-                     getCountInCart({ cartItems: cart?.items, productId }) - 1,
+                  count: 0,
                }),
                cache: 'no-store',
                headers: {
@@ -127,6 +122,7 @@ export const Item = ({ cartItem }) => {
                },
             })
 
+            toast.success('Item removed from cart')
             const json = await response.json()
             dispatchCart(json)
          }
@@ -175,34 +171,20 @@ export const Item = ({ cartItem }) => {
             </Button>
          )
 
-      if (count === 0) {
-         return <Button onClick={onAddToCart}>🛒 Add to Cart</Button>
-      }
-
-      if (count > 0) {
-         return (
-            <>
-               <Button variant="outline" size="icon" onClick={onRemoveFromCart}>
-                  {count === 1 ? (
-                     <X className="h-4" />
-                  ) : (
-                     <MinusIcon className="h-4" />
-                  )}
-               </Button>
-               <Button disabled variant="ghost" size="icon">
-                  {count}
-               </Button>
-               <Button
-                  disabled={productId == ''}
-                  variant="outline"
-                  size="icon"
-                  onClick={onAddToCart}
-               >
-                  <PlusIcon className="h-4" />
-               </Button>
-            </>
-         )
-      }
+      return (
+         <>
+            <div className="flex gap-2">
+               <QuantityInputComponent
+                  quantity={quantity}
+                  setQuantity={setQuantity}
+                  maxValue={product.stock}
+               />
+               {count !== quantity && (
+                  <Button onClick={onAddToCart}>Save</Button>
+               )}
+            </div>
+         </>
+      )
    }
 
    function Price() {
@@ -238,7 +220,7 @@ export const Item = ({ cartItem }) => {
                </Link>
             </div>
          </CardHeader>
-         <CardContent className="grid grid-cols-6 gap-4 p-3">
+         <CardContent className="grid grid-cols-7 gap-4 p-3">
             <div className="relative w-full col-span-2 hidden md:inline-flex">
                <Link href={`/products/${product?.id}`}>
                   <Image
@@ -259,6 +241,16 @@ export const Item = ({ cartItem }) => {
                </p>
                <Price />
                <CartButton />
+            </div>
+            <div className="col-span-1 flex justify-end">
+               <Button
+                  variant="ghost"
+                  size="icon"
+                  className="opacity-50 hover:opacity-100"
+                  onClick={onRemoveFromCart}
+               >
+                  <Trash className="h-4 text-red-600 " />
+               </Button>
             </div>
          </CardContent>
       </Card>

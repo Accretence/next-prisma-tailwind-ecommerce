@@ -1,12 +1,16 @@
 'use client'
 
 import { Spinner } from '@/components/native/icons'
+import { CartPopupContext } from '@/components/native/nav/cart-context-provider'
 import { Button } from '@/components/ui/button'
 import { useAuthenticated } from '@/hooks/useAuthentication'
 import { getCountInCart, getLocalCart } from '@/lib/cart'
 import { CartContextProvider, useCartContext } from '@/state/Cart'
-import { MinusIcon, PlusIcon, ShoppingBasketIcon, X } from 'lucide-react'
-import { useState } from 'react'
+import { ShoppingBasketIcon } from 'lucide-react'
+import Link from 'next/link'
+import { useContext, useState } from 'react'
+
+import QuantityInputComponent from './quantity-input-component'
 
 export default function CartButton({ product }) {
    return (
@@ -18,11 +22,15 @@ export default function CartButton({ product }) {
 
 export function ButtonComponent({ product }) {
    const { authenticated } = useAuthenticated()
-   const { loading, cart, refreshCart, dispatchCart } = useCartContext()
+   const { cart, dispatchCart } = useCartContext()
+
+   const [quantity, setQuantity] = useState(1)
+
+   const { Popup: productPopup } = useContext(CartPopupContext)
 
    const [fetchingCart, setFetchingCart] = useState(false)
 
-   function findLocalCartIndexById(array, productId) {
+   function findLocalCartIndexById(array: any, productId: string) {
       for (let i = 0; i < array.length; i++) {
          if (array?.items[i]?.productId === productId) {
             return i
@@ -45,16 +53,19 @@ export function ButtonComponent({ product }) {
                method: 'POST',
                body: JSON.stringify({
                   productId: product?.id,
-                  count:
-                     getCountInCart({
-                        cartItems: cart?.items,
-                        productId: product?.id,
-                     }) + 1,
+                  count: quantity + count,
                }),
                cache: 'no-store',
                headers: {
                   'Content-Type': 'application/json-string',
                },
+            })
+
+            productPopup({
+               name: product.title,
+               quantity,
+               image: product.images[0],
+               id: product.id,
             })
 
             const json = await response.json()
@@ -83,62 +94,7 @@ export function ButtonComponent({ product }) {
 
             dispatchCart(localCart)
          }
-
-         setFetchingCart(false)
-      } catch (error) {
-         console.error({ error })
-      }
-   }
-
-   async function onRemoveFromCart() {
-      try {
-         setFetchingCart(true)
-
-         const count = getCountInCart({
-            cartItems: cart?.items,
-            productId: product?.id,
-         })
-
-         if (authenticated) {
-            const response = await fetch(`/api/cart`, {
-               method: 'POST',
-               body: JSON.stringify({
-                  productId: product?.id,
-                  count:
-                     getCountInCart({
-                        cartItems: cart?.items,
-                        productId: product?.id,
-                     }) - 1,
-               }),
-               cache: 'no-store',
-               headers: {
-                  'Content-Type': 'application/json-string',
-               },
-            })
-
-            const json = await response.json()
-
-            dispatchCart(json)
-         }
-
-         const localCart = getLocalCart() as any
-         const index = findLocalCartIndexById(localCart, product?.id)
-
-         if (!authenticated && count > 1) {
-            for (let i = 0; i < localCart.items.length; i++) {
-               if (localCart.items[i].productId === product?.id) {
-                  localCart.items[i].count = localCart.items[i].count - 1
-               }
-            }
-
-            dispatchCart(localCart)
-         }
-
-         if (!authenticated && count === 1) {
-            localCart.items.splice(index, 1)
-
-            dispatchCart(localCart)
-         }
+         setQuantity(1)
 
          setFetchingCart(false)
       } catch (error) {
@@ -158,32 +114,48 @@ export function ButtonComponent({ product }) {
       productId: product?.id,
    })
 
-   if (count === 0) {
-      return (
-         <Button className="flex gap-2" onClick={onAddToCart}>
-            <ShoppingBasketIcon className="h-4" /> Add to Cart
-         </Button>
-      )
-   }
-
    if (count > 0) {
       return (
-         <>
-            <Button variant="outline" size="icon" onClick={onRemoveFromCart}>
-               {count == 1 ? (
-                  <X className="h-4 w-4" />
-               ) : (
-                  <MinusIcon className="h-4 w-4" />
-               )}
+         <Link href="/cart">
+            <Button className="flex gap-2 relative">
+               <div className="relative ">
+                  <ShoppingBasketIcon className="h-4" />
+                  {count > 0 ? (
+                     <div className="absolute bottom-[50%] right-[-10%] text-xs">
+                        {count}
+                     </div>
+                  ) : null}
+               </div>
+               View in Cart
             </Button>
-
-            <Button disabled variant="outline" size="icon">
-               {count}
-            </Button>
-            <Button variant="outline" size="icon" onClick={onAddToCart}>
-               <PlusIcon className="h-4 w-4" />
-            </Button>
-         </>
+         </Link>
       )
    }
+
+   return (
+      <>
+         {count > 0 ? (
+            <></>
+         ) : (
+            <>
+               <QuantityInputComponent
+                  quantity={quantity}
+                  setQuantity={setQuantity}
+                  maxValue={product.stock}
+               />
+               <Button className="flex gap-2 relative" onClick={onAddToCart}>
+                  <div className="relative ">
+                     <ShoppingBasketIcon className="h-4" />
+                     {count > 0 ? (
+                        <div className="absolute bottom-[50%] right-[-10%] text-xs">
+                           {count}
+                        </div>
+                     ) : null}
+                  </div>
+                  Add to Cart
+               </Button>
+            </>
+         )}
+      </>
+   )
 }

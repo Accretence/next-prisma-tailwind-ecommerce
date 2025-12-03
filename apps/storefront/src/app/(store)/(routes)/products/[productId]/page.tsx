@@ -1,10 +1,12 @@
 import Carousel from '@/components/native/Carousel'
+import { Separator } from '@/components/ui/separator'
 import prisma from '@/lib/prisma'
 import { isVariableValid } from '@/lib/utils'
 import { ChevronRightIcon } from 'lucide-react'
-import type { Metadata, ResolvingMetadata } from 'next'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
+import { CarouselProductComponent } from './components/carousel-product-component'
 import { DataSection } from './components/data'
 
 type Props = {
@@ -12,15 +14,18 @@ type Props = {
    searchParams: { [key: string]: string | string[] | undefined }
 }
 
-export async function generateMetadata(
-   { params, searchParams }: Props,
-   parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
    const product = await prisma.product.findUnique({
       where: {
          id: params.productId,
       },
    })
+
+   if (!product) {
+      return {
+         title: 'Product Not Found',
+      }
+   }
 
    return {
       title: product.title,
@@ -44,6 +49,12 @@ export default async function Product({
       include: {
          brand: true,
          categories: true,
+         crossSellProducts: {
+            include: { brand: true, categories: true },
+         },
+         crossSellOf: {
+            include: { brand: true, categories: true },
+         },
       },
    })
 
@@ -51,10 +62,18 @@ export default async function Product({
       return (
          <>
             <Breadcrumbs product={product} />
-            <div className="mt-6 grid grid-cols-1 gap-2 md:grid-cols-3">
+            <div className="mt-6 grid grid-cols-1 md:gap-4 md:grid-cols-3">
                <ImageColumn product={product} />
                <DataSection product={product} />
             </div>
+            {product.crossSellProducts.length > 0 ? (
+               <>
+                  <Separator className="my-6" />
+                  <CarouselProductComponent
+                     crossSellProducts={product.crossSellProducts}
+                  />
+               </>
+            ) : null}
          </>
       )
    }
@@ -62,7 +81,7 @@ export default async function Product({
 
 const ImageColumn = ({ product }) => {
    return (
-      <div className="relative min-h-[50vh] w-full col-span-1">
+      <div className="relative  w-full col-span-1">
          <Carousel images={product?.images} />
       </div>
    )

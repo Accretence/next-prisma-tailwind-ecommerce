@@ -47,8 +47,10 @@ module.exports = {
    			},
    			card: {
    				DEFAULT: 'hsl(var(--card))',
-   				foreground: 'hsl(var(--card-foreground))'
+   				foreground: 'hsl(var(--card-foreground))',
+				primary: 'hsl(var(--card-primary))'
    			},
+
    			chart: {
    				'1': 'hsl(var(--chart-1))',
    				'2': 'hsl(var(--chart-2))',

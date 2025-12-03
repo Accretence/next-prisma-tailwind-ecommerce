@@ -11,7 +11,7 @@ export default async function Navbar() {
             <Link href="/" className="font-bold tracking-wider">
                ADMIN
             </Link>
-            <MainNav />
+            <MainNav className="hidden lg:block" />
          </div>
          <div className="flex items-center gap-2">
             <ThemeToggle />

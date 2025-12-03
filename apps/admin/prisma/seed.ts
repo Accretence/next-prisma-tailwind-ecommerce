@@ -268,6 +268,39 @@ async function main() {
    }
 
    try {
+      console.log('Assigning random cross-sell products...')
+
+      for (const product of createdProducts) {
+         // filter out the product itself
+         const otherProducts = createdProducts.filter(
+            (p) => p.id !== product.id
+         )
+
+         // choose a random number from 1 to 5 (or less if fewer products exist)
+         const maxCrossSells = Math.min(5, otherProducts.length)
+         const randomCount = Math.floor(Math.random() * maxCrossSells) + 1
+
+         // shuffle + slice based on randomCount
+         const randomCrossSells = otherProducts
+            .sort(() => 0.5 - Math.random())
+            .slice(0, randomCount)
+
+         await prisma.product.update({
+            where: { id: product.id },
+            data: {
+               crossSellProducts: {
+                  connect: randomCrossSells.map((p) => ({ id: p.id })),
+               },
+            },
+         })
+      }
+
+      console.log('Random cross-sell assignment done!')
+   } catch (error) {
+      console.error('Could not assign cross-sell products...', error)
+   }
+
+   try {
       await prisma.author.create({
          data: {
             name: 'Amirhossein Mohammadi',

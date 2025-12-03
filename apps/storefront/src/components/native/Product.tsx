@@ -1,16 +1,10 @@
 import { ImageSkeleton } from '@/components/native/icons'
 import { Badge } from '@/components/ui/badge'
-import {
-   Card,
-   CardContent,
-   CardDescription,
-   CardFooter,
-   CardHeader,
-   CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { ProductWithIncludes } from '@/types/prisma'
 import Image from 'next/image'
 import Link from 'next/link'
+
 
 export const ProductGrid = ({
    products,

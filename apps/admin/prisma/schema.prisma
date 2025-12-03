@@ -123,6 +123,10 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  crossSellProducts Product[] @relation("CrossSell")
+  crossSellOf       Product[] @relation("CrossSell")
+
+
   @@index([brandId])
 }
 

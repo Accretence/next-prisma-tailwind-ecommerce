@@ -71,7 +71,6 @@ export async function PATCH(
       const body = await req.json()
 
       const { title, description } = body
-      console.log('PATCH', body)
 
       if (!title && !description) {
          return new NextResponse(

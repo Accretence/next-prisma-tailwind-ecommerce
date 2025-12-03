@@ -7,17 +7,30 @@ import * as React from 'react'
 
 export function ThemeToggle() {
    const { resolvedTheme, setTheme } = useTheme()
+   const [mounted, setMounted] = React.useState(false)
+
+   React.useEffect(() => {
+      setMounted(true)
+   }, [])
+
+   const isDark = resolvedTheme === 'dark'
 
    return (
       <Button
          variant="outline"
          size="icon"
-         onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+         onClick={() => setTheme(isDark ? 'light' : 'dark')}
+         aria-label="Toggle theme"
       >
-         {resolvedTheme === 'dark' ? (
-            <SunIcon className="h-4" />
+         {mounted ? (
+            isDark ? (
+               <SunIcon className="h-4" />
+            ) : (
+               <MoonIcon className="h-4" />
+            )
          ) : (
-            <MoonIcon className="h-4" />
+            // preserve layout during hydration; hide icon until mounted
+            <SunIcon className="h-4 opacity-0" aria-hidden />
          )}
       </Button>
    )

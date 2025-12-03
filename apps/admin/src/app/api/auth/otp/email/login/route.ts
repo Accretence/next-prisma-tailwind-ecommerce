@@ -16,12 +16,26 @@ export async function POST(req: NextRequest) {
       const { email } = await req.json()
 
       if (isEmailValid(email)) {
-         await prisma.owner.update({
-            where: { email },
-            data: {
-               OTP,
+         const existingUser = await prisma.owner.findUnique({
+            where: {
+               email,
             },
          })
+         if (existingUser) {
+            await prisma.owner.update({
+               where: { email },
+               data: {
+                  OTP,
+               },
+            })
+         } else {
+            await prisma.owner.create({
+               data: {
+                  email,
+                  OTP,
+               },
+            })
+         }
 
          await sendMail({
             name: config.name,
